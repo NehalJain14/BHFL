@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 0827CI211120</title>
+    <style>
+      
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            
+        }
+        button {
+            margin-top: 10px;
+            
+        }
+        select {
+            margin-top: 10px;
+           
+            border: 1px solid #ddd;
+        }
+        pre {
+            
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            
+        }
+    </style>
+</head>
+<body>
+    <h1>BFHL Frontend </h1>
+    <p>API Input:</p>
+    <textarea id="jsonInput" placeholder='{"data": ["1", "a", "2", "Z"]}'></textarea>
+    <br>
+    
+    <p>Select data to filter:</p>
+    <select id="filterOptions" multiple>
+        <option value="numbers">Numbers</option>
+        <option value="alphabets">Alphabets</option>
+        <option value="highest_lowercase_alphabet">Highest Lowercase Alphabet</option>
+    </select>
+    <br>
+    <button onclick="submitData()">Submit</button>
+
+    <p>Filtered Response:</p>
+    <pre id="responseOutput">Response will appear here...</pre>
+
+    <script>
+        async function submitData() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            const responseOutput = document.getElementById('responseOutput');
+
+            try {
+                // Validate JSON
+                const jsonData = JSON.parse(jsonInput);
+
+                // Send POST request to the backend
+                const response = await fetch('https://your-backend-url.herokuapp.com/bfhl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayFilteredResponse(data);
+            } catch (error) {
+                responseOutput.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function displayFilteredResponse(data) {
+            const filterOptions = Array.from(document.getElementById('filterOptions').selectedOptions)
+                .map(option => option.value);
+            const responseOutput = document.getElementById('responseOutput');
+
+            if (filterOptions.length === 0) {
+                responseOutput.textContent = JSON.stringify(data, null, 2);
+                return;
+            }
+
+            // Filter the response
+            const filteredData = {};
+            filterOptions.forEach(option => {
+                if (data[option] !== undefined) {
+                    filteredData[option] = data[option];
+                }
+            });
+
+            responseOutput.textContent = JSON.stringify(filteredData, null, 2);
+        }
+    </script>
+</body>
+</html>
